@@ -1148,6 +1148,27 @@ textarea.form-control {
   text-align: center;
 }
 
+.form-status {
+  margin-top: var(--space-4);
+  padding: var(--space-4);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  text-align: center;
+  font-size: 0.9375rem;
+}
+
+.form-status--success {
+  background: rgba(46, 125, 50, 0.1);
+  color: #2e7d32;
+  border: 1px solid rgba(46, 125, 50, 0.25);
+}
+
+.form-status--error {
+  background: rgba(192, 57, 43, 0.1);
+  color: var(--color-red-dark);
+  border: 1px solid rgba(192, 57, 43, 0.25);
+}
+
 /* =========================================================
    Footer
    ========================================================= */

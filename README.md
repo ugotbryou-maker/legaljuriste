@@ -50,9 +50,53 @@ Le site contient des **placeholders** (texte surligné en rouge, balise `<span c
 - [ ] **Durée de conservation des données du formulaire** : confirmer la durée indiquée (`[3 ans — à confirmer]`) avec un conseil juridique si besoin.
 - [ ] Vérifier la cohérence des sections "Cookies & traceurs" et "Transferts hors UE" avec les outils effectivement installés (voir point 5).
 
-### 4. Formulaire de contact (`index.html`, section `#contact`)
-- [ ] Le formulaire pointe vers `https://formspree.io/f/REMPLACER_PAR_VOTRE_ID`. Créer un compte sur [Formspree](https://formspree.io) (ou utiliser Netlify Forms si hébergement sur Netlify) et remplacer l'ID par l'identifiant réel du formulaire.
-- [ ] Tester l'envoi du formulaire en production avant de lancer les campagnes.
+### 4. Formulaire de contact (`index.html`, section `#contact`) → Google Sheets
+Le formulaire envoie ses données vers un **Google Apps Script Web App** connecté à un Google Sheet. Le `js/main.js` intercepte la soumission, envoie les données en `fetch` (mode `no-cors`) puis affiche un message de confirmation.
+
+Sheet cible : https://docs.google.com/spreadsheets/d/1LSy8wuVYV-b44jD6KaIqz15FMVkNWvdxUVgrkWMVqJk/edit
+
+**Étapes pour activer la connexion (à faire une seule fois) :**
+
+1. Ouvrir le Google Sheet ci-dessus.
+2. Renommer le premier onglet en `Leads` (ou adapter le nom dans le script ci-dessous), et ajouter en ligne 1 les en-têtes :
+   `Date | Nom | Téléphone | Email | Démarche | Message | Consentement | Page`
+3. Menu **Extensions → Apps Script**, supprimer le code par défaut et coller :
+
+   ```javascript
+   function doPost(e) {
+     var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Leads');
+     var data = e.parameter;
+
+     sheet.appendRow([
+       data.date || new Date(),
+       data.nom || '',
+       data.telephone || '',
+       data.email || '',
+       data.demarche || '',
+       data.message || '',
+       data.consentement ? 'Oui' : 'Non',
+       data.page || ''
+     ]);
+
+     return ContentService
+       .createTextOutput(JSON.stringify({ result: 'success' }))
+       .setMimeType(ContentService.MimeType.JSON);
+   }
+   ```
+
+4. Cliquer sur **Déployer → Nouveau déploiement** :
+   - Type : **Application Web**
+   - Exécuter en tant que : **Moi**
+   - Qui a accès : **Tout le monde**
+   - Cliquer sur **Déployer**, puis autoriser l'accès (compte Google propriétaire du Sheet).
+5. Copier l'URL fournie (se termine par `/exec`).
+6. Dans `index.html`, remplacer l'attribut `action` du `<form id="contactForm">` :
+   ```html
+   <form id="contactForm" action="COLLER_URL_ICI/exec" method="POST">
+   ```
+7. Tester l'envoi du formulaire en production : une nouvelle ligne doit apparaître dans l'onglet `Leads` du Sheet.
+
+⚠️ Si le code de l'Apps Script est modifié plus tard, il faut créer un **nouveau déploiement** (ou gérer les déploiements existants → modifier la version) pour que les changements soient pris en compte par l'URL `/exec`.
 
 ### 5. Suivi publicitaire (Google Ads / Meta Ads / GA4)
 - [ ] Si des campagnes Google Ads / Meta Ads / Google Analytics sont mises en place, ajouter les scripts de suivi correspondants dans `index.html` (et idéalement les autres pages), **conditionnés au consentement cookies**.

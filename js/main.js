@@ -106,6 +106,67 @@
   });
 
   /* ---------------------------------------------------------
+     Formulaire de contact -> Google Sheets (Apps Script Web App)
+     --------------------------------------------------------- */
+  var contactForm = document.getElementById('contactForm');
+  var formStatus = document.getElementById('formStatus');
+
+  if (contactForm) {
+    var submitBtn = contactForm.querySelector('button[type="submit"]');
+    var submitBtnDefaultHTML = submitBtn ? submitBtn.innerHTML : '';
+
+    contactForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      var action = contactForm.getAttribute('action');
+      if (!action || action.indexOf('REMPLACER_PAR_ID_DE_DEPLOIEMENT') !== -1) {
+        if (formStatus) {
+          formStatus.hidden = false;
+          formStatus.className = 'form-status form-status--error';
+          formStatus.textContent = "Le formulaire n'est pas encore connecté. Merci de nous contacter par téléphone ou WhatsApp en attendant.";
+        }
+        return;
+      }
+
+      var formData = new FormData(contactForm);
+      formData.append('page', window.location.href);
+      formData.append('date', new Date().toISOString());
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Envoi en cours…';
+      }
+
+      fetch(action, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: formData
+      })
+        .then(function () {
+          contactForm.reset();
+          contactForm.hidden = true;
+          if (formStatus) {
+            formStatus.hidden = false;
+            formStatus.className = 'form-status form-status--success';
+            formStatus.textContent = 'Merci ! Votre demande a bien été envoyée. Notre équipe vous recontacte sous 24 à 48h ouvrées.';
+            formStatus.focus();
+          }
+        })
+        .catch(function () {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = submitBtnDefaultHTML;
+          }
+          if (formStatus) {
+            formStatus.hidden = false;
+            formStatus.className = 'form-status form-status--error';
+            formStatus.textContent = "Une erreur est survenue lors de l'envoi. Merci de réessayer ou de nous contacter par téléphone/WhatsApp.";
+          }
+        });
+    });
+  }
+
+  /* ---------------------------------------------------------
      Cookie consent banner
      --------------------------------------------------------- */
   var COOKIE_KEY = 'legal-juriste-cookie-consent';
