@@ -406,6 +406,29 @@ strong { color: var(--color-ink); }
   white-space: nowrap;
 }
 
+.nav__whatsapp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  background: #25D366;
+  color: #fff;
+  flex: none;
+  transition: filter var(--transition-fast);
+}
+
+.nav__whatsapp:hover,
+.nav__whatsapp:focus-visible {
+  filter: brightness(0.92);
+}
+
+.nav__whatsapp .icon {
+  fill: currentColor;
+  stroke: none;
+}
+
 .nav__cta {
   display: none;
 }
@@ -480,6 +503,7 @@ strong { color: var(--color-ink); }
   .nav__panel .nav__links {
     flex-direction: row;
     padding: 0;
+    gap: var(--space-6);
   }
 
   .nav__panel .nav__links a {
